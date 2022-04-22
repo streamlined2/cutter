@@ -6,16 +6,15 @@ import org.junit.jupiter.api.Test;
 
 class CutShapeTest {
 	
-	
 	@Test
-	public void test3() {
+	void test3() {
 		int[] values = {1, 1, 1};
 		CutShape cutter = new CutShapeImpl(values, 3, false);
 		assertFalse(cutter.cut());
 	}
 
 	@Test
-	public void test4() {
+	void test4() {
 		int[] values = {1, 1, 1, 1};
 		int[] expectedResult = {1, 1, 2, 2};
 		CutShape cutter = new CutShapeImpl(values, 4, true);
@@ -24,7 +23,7 @@ class CutShapeTest {
 	}
 	
 	@Test
-	public void test6() {
+	void test6() {
 		int[] values = {0, 1, 1, 1,
 						1, 1, 0, 1};
 		int[] expectedResult = {0, 1, 2, 2,
@@ -35,7 +34,7 @@ class CutShapeTest {
 	}
 	
 	@Test
-	public void test8() {
+	void test8() {
 		int[] values = {0, 1, 1, 0,
 						1, 1, 1, 1,
 						1, 0, 0, 1};
@@ -48,7 +47,7 @@ class CutShapeTest {
 	}
 	
 	@Test
-	public void testDisconnectedOnly() {
+	void testDisconnectedOnly() {
 		int[] values = {1, 0, 1, 1,
 						0, 0, 0, 0,
 						0, 0, 0, 1};
@@ -63,7 +62,7 @@ class CutShapeTest {
 	}
 	
 	@Test
-	public void testDisconnectedOnly2() {
+	void testDisconnectedOnly2() {
 		int[] values = { 0, 0, 0, 1, 0, 0, 
 						 0, 1, 1, 1, 1, 1, 
 						 1, 1, 1, 1, 1, 1, 
@@ -80,7 +79,7 @@ class CutShapeTest {
 	}
 	
 	@Test
-	public void testConnectedOnly() {
+	void testConnectedOnly() {
 		int[] values = { 0, 0, 1, 1, 1, 
 						 1, 1, 1, 1, 1, 
 						 1, 1, 1, 1, 0,

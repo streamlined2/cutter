@@ -2,13 +2,20 @@ package luxoft.ch.cutter;
 
 public abstract class CutShape {
 
-	private final int width;
-	private final boolean singleCut;
-	private final int[] values;
+	protected final int width;
+	protected final boolean singleCut;
+	protected final int[] values;
 
 	public abstract boolean cut();
 
 	protected CutShape(int[] input, int width, boolean singleCut) {
+		if (width <= 0) {
+			throw new IllegalArgumentException("width should be positive");
+		}
+		if (input.length % width != 0) {
+			throw new IllegalArgumentException(
+					"size %d of passed array should be factor of %d".formatted(input.length, width));
+		}
 		this.values = input;
 		this.width = width;
 		this.singleCut = singleCut;
@@ -16,14 +23,6 @@ public abstract class CutShape {
 
 	public int[] getValues() {
 		return values;
-	}
-
-	public int getWidth() {
-		return width;
-	}
-
-	public boolean isSingleCut() {
-		return singleCut;
 	}
 
 }
