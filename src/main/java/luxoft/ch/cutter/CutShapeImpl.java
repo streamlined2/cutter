@@ -26,11 +26,11 @@ public class CutShapeImpl implements CutShape {
 			return false;
 		}
 		Index splitIndex = index.get().next();
-		boolean reflectionIdentical = board.isReflectionSame(splitIndex);
-		if (reflectionIdentical) {
-			board.split(splitIndex);
+		Optional<Integer> turns = board.getTurnCountForSameReflection(splitIndex);
+		if (turns.isPresent()) {
+			board.splitInTwoParts(splitIndex, turns.get());
 		}
-		return reflectionIdentical;
+		return turns.isPresent();
 	}
 
 }

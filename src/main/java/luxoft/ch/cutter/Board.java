@@ -67,11 +67,75 @@ public class Board {
 			return index.type == IndexType.COLUMN ? index.value : width;
 		}
 
+		private Position turnClockwise(Position leftTop, int side, int times) {
+			int count = times;
+			Position position = this;
+			do {
+				int bottomRow = leftTop.row + side - 1;
+				int rightColumn = leftTop.column + side - 1;
+				int columnOffset = position.column - leftTop.column;
+				int rowOffset = position.row - leftTop.row;
+				if (isTopEdge(position, leftTop, side)) {
+					position = new Position(leftTop.row + columnOffset, rightColumn);
+				} else if (isRightEdge(position, leftTop, side)) {
+					position = new Position(bottomRow, rightColumn - rowOffset);
+				} else if (isBottomEdge(position, leftTop, side)) {
+					position = new Position(bottomRow - (rightColumn - position.column), leftTop.column);
+				} else {
+					position = new Position(leftTop.row, leftTop.column + (bottomRow - position.row));
+				}
+			} while (--count > 0);
+			return position;
+		}
+
+		private boolean isTopEdge(Position position, Position leftTop, int side) {
+			return position.row == leftTop.row && position.column >= leftTop.column
+					&& position.column < leftTop.column + side - 1;
+		}
+
+		private boolean isRightEdge(Position position, Position leftTop, int side) {
+			return position.column == leftTop.column + side - 1 && position.row >= leftTop.row
+					&& position.row < leftTop.row + side - 1;
+		}
+
+		private boolean isBottomEdge(Position position, Position leftTop, int side) {
+			return position.row == leftTop.row + side - 1 && position.column > leftTop.column
+					&& position.column < leftTop.column + side;
+		}
+
+		private Optional<Position> getTurnedReflectedPosition(Index index, int times) {
+			Position position = getReflectedPosition(index);
+			if (!position.isValid()) {
+				return Optional.empty();
+			}
+			if (times == 0) {
+				return Optional.of(position);
+			}
+			Position leftTop = getLeftTopPosition(index);
+			int side = getSide(leftTop);
+			if (side == 1) {
+				return Optional.of(position);
+			}
+			return Optional.of(position.turnClockwise(leftTop, side, times));
+		}
+
+		private int getSide(Position leftTop) {
+			return Math.min(getLimit(IndexType.ROW) - leftTop.row, getLimit(IndexType.COLUMN) - leftTop.column);
+		}
+
+		private Position getLeftTopPosition(Index index) {
+			return switch (index.type) {
+			case COLUMN -> new Position(0, index.value);
+			case ROW -> new Position(index.value, 0);
+			};
+		}
+
 	}
 
 	private static final int EMPTY_BLOCK = 0;
 	private static final int FIRST_PIECE = 1;
 	private static final int SECOND_PIECE = 2;
+	private static final int TURN_COUNT = 3;
 
 	protected final int[] values;
 	private final int width;
@@ -95,11 +159,7 @@ public class Board {
 	}
 
 	private int getIndex(int row, int col) {
-		int index = col;
-		if (row > 0) {
-			index += (row - 1) * width;
-		}
-		return index;
+		return row * width + col;
 	}
 
 	private int getValue(int row, int col) {
@@ -161,13 +221,22 @@ public class Board {
 		return sum;
 	}
 
-	public boolean isReflectionSame(Index divisionIndex) {
+	public Optional<Integer> getTurnCountForSameReflection(Index divisionIndex) {
+		for (int turns = 0; turns < TURN_COUNT; turns++) {
+			if (isTurnedReflectionSame(divisionIndex, turns)) {
+				return Optional.of(Integer.valueOf(turns));
+			}
+		}
+		return Optional.empty();
+	}
+
+	private boolean isTurnedReflectionSame(Index divisionIndex, int turns) {
 		for (Position position = start(); hasNext(position,
 				divisionIndex); position = position.nextPosition(divisionIndex)) {
 			boolean occupied = isCellOccupied(position);
-			Position reflectedPosition = position.getReflectedPosition(divisionIndex);
-			if (reflectedPosition.isValid()) {
-				boolean reflectedOccupied = isCellOccupied(reflectedPosition);
+			Optional<Position> reflectedPosition = position.getTurnedReflectedPosition(divisionIndex, turns);
+			if (reflectedPosition.isPresent()) {
+				boolean reflectedOccupied = isCellOccupied(reflectedPosition.get());
 				if (occupied != reflectedOccupied) {
 					return false;
 				}
@@ -176,12 +245,12 @@ public class Board {
 		return true;
 	}
 
-	public void split(Index divisionIndex) {
+	public void splitInTwoParts(Index divisionIndex, int turns) {
 		for (Position position = start(); hasNext(position,
 				divisionIndex); position = position.nextPosition(divisionIndex)) {
-			Position reflectedPosition = position.getReflectedPosition(divisionIndex);
-			if (reflectedPosition.isValid()) {
-				setValue(reflectedPosition, SECOND_PIECE);
+			Optional<Position> turnedReflectedPosition = position.getTurnedReflectedPosition(divisionIndex, turns);
+			if (turnedReflectedPosition.isPresent() && isCellOccupied(turnedReflectedPosition.get())) {
+				setValue(turnedReflectedPosition.get(), SECOND_PIECE);
 			}
 		}
 	}
