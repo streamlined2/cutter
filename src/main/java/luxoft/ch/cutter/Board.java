@@ -105,9 +105,6 @@ public class Board {
 
 		private Optional<Position> getTurnedReflectedPosition(Index index, int times) {
 			Position position = getReflectedPosition(index);
-			if (!position.isValid()) {
-				return Optional.empty();
-			}
 			if (times == 0) {
 				return Optional.of(position);
 			}
@@ -120,7 +117,7 @@ public class Board {
 		}
 
 		private int getSide(Position leftTop) {
-			return Math.min(getLimit(IndexType.ROW) - leftTop.row, getLimit(IndexType.COLUMN) - leftTop.column);
+			return Math.max(getLimit(IndexType.ROW) - leftTop.row, getLimit(IndexType.COLUMN) - leftTop.column);
 		}
 
 		private Position getLeftTopPosition(Index index) {
@@ -135,7 +132,7 @@ public class Board {
 	private static final int EMPTY_BLOCK = 0;
 	private static final int FIRST_PIECE = 1;
 	private static final int SECOND_PIECE = 2;
-	private static final int TURN_COUNT = 3;
+	private static final int TURN_COUNT = 4;
 
 	protected final int[] values;
 	private final int width;
@@ -235,7 +232,7 @@ public class Board {
 				divisionIndex); position = position.nextPosition(divisionIndex)) {
 			boolean occupied = isCellOccupied(position);
 			Optional<Position> reflectedPosition = position.getTurnedReflectedPosition(divisionIndex, turns);
-			if (reflectedPosition.isPresent()) {
+			if (reflectedPosition.isPresent() && reflectedPosition.get().isValid()) {
 				boolean reflectedOccupied = isCellOccupied(reflectedPosition.get());
 				if (occupied != reflectedOccupied) {
 					return false;
@@ -249,7 +246,8 @@ public class Board {
 		for (Position position = start(); hasNext(position,
 				divisionIndex); position = position.nextPosition(divisionIndex)) {
 			Optional<Position> turnedReflectedPosition = position.getTurnedReflectedPosition(divisionIndex, turns);
-			if (turnedReflectedPosition.isPresent() && isCellOccupied(turnedReflectedPosition.get())) {
+			if (turnedReflectedPosition.isPresent() && turnedReflectedPosition.get().isValid()
+					&& isCellOccupied(turnedReflectedPosition.get())) {
 				setValue(turnedReflectedPosition.get(), SECOND_PIECE);
 			}
 		}

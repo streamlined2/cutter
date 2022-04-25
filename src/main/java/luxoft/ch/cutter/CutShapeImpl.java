@@ -2,7 +2,7 @@ package luxoft.ch.cutter;
 
 import java.util.Optional;
 import luxoft.ch.cutter.Board.Index;
-import luxoft.ch.cutter.Board.IndexType;;
+import luxoft.ch.cutter.Board.IndexType;
 
 public class CutShapeImpl implements CutShape {
 
@@ -21,7 +21,11 @@ public class CutShapeImpl implements CutShape {
 
 	@Override
 	public boolean cut() {
-		Optional<Index> index = board.getSplitIndex(IndexType.COLUMN);
+		return cutForIndexType(IndexType.COLUMN) || cutForIndexType(IndexType.ROW);
+	}
+
+	private boolean cutForIndexType(IndexType indexType) {
+		Optional<Index> index = board.getSplitIndex(indexType);
 		if (index.isEmpty()) {
 			return false;
 		}
